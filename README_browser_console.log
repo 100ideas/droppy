@@ -1,4 +1,6 @@
-// client -> server ... server.js#431 received msg.type strings 
+// @ts-nocheck
+
+// client -> server ... server.js#431 received msg.type strings
 "REQUEST_SETTINGS"
 "REQUEST_UPDATE"
 "RELOAD_DIRECTORY"
@@ -63,8 +65,6 @@ rec1 = {
     vId: 0
   }
 }
-
-
 // in droppy editor - edit last three chars of puc19fsa.txt to be lowercase
 send2 = {
   "vId": 0,
@@ -92,9 +92,9 @@ rec4 = {
   }
 }
 
+hmmmmmm
 
-
-
+// @js-nocheck
 // ---------- startup first connection -----------
 
 // to server
@@ -117,3 +117,134 @@ rec4 = {
 
 // to server
 droppysend(0, 'REQUEST_UPDATE', '/csv')
+// -----------------------------------------------
+
+
+
+// ---------- chokidar events on file rename -----------
+
+{
+  "type": "CHOKIDAR",
+  "event": {
+    "event": "unlink",
+    "path": "/csv/notes/browser-console.log.js",
+    "fullpath": "/Users/100ideas/Desktop/droppy/csv/notes/browser-console.log.js"
+  }
+}
+
+{
+  "type": "CHOKIDAR",
+  "event": {
+    "event": "add",
+    "path": "/csv/notes/browser-console.logz.js",
+    "fullpath": "/Users/100ideas/Desktop/droppy/csv/notes/browser-console.logz.js",
+    "stats": {
+      "dev": 16777220,
+      "mode": 33188,
+      "nlink": 1,
+      "uid": 501,
+      "gid": 20,
+      "rdev": 0,
+      "blksize": 4096,
+      "ino": 71048820,
+      "size": 10677,
+      "blocks": 24,
+      "atimeMs": 1563968951145.6318,
+      "mtimeMs": 1563968951117,
+      "ctimeMs": 1563968951117.6792,
+      "birthtimeMs": 1563956643209.0586,
+      "atime": "2019-07-24T11:49:11.146Z",
+      "mtime": "2019-07-24T11:49:11.117Z",
+      "ctime": "2019-07-24T11:49:11.118Z",
+      "birthtime": "2019-07-24T08:24:03.209Z"
+    }
+  }
+}
+// -----------------------------------------------
+
+
+
+// ---------- ALL_SIZES vs LS_ALL -----------
+
+LS_ALL ={
+"type":"ALL_FILES",
+"data":{
+  "/":          {"files": {".DS_Store":{"size":6148,"mtime":1563956509557},"j5_Report.csv":{"size":3988,"mtime":1563930180731},"nochockinew.txt":{"size":874,"mtime":1563964489898},"project-trackbook ux interview 1.md":{"size":7129,"mtime":1538466815770},"puc19fsa.txt":{"size":2825,"mtime":1563933760441}},"size":88932,"mtime":1563964448891},
+  "/csv":       {"files": {"20170817_quantification_oshv_orf117_plasmid - QubitData_2017-08-17_10-33-11.csv":{"size":491,"mtime":1563932162253},".DS_Store":{"size":6148,"mtime":1563956468567},"Oligo_Synthesis_cgg.csv":{"size":891,"mtime":1563964329627},"j5_Report.csv":{"size":3988,"mtime":1563932162255}},"size":18950,"mtime":1563962620331},
+  "/csv/notes": {"files":{"browser-console.log.js":{"size":7425,"mtime":1563962332069},"foo.txt":{"size":7,"mtime":1563956500700}},"size":7432,"mtime":1563956752451}
+}}
+
+
+ALL_SIZES = {
+  "type": "ALL_FILE_SIZES",
+  "data": {
+    "/": {
+      "files": {
+        ".DS_Store": {
+          "size": 6148,
+          "mtime": 1563956509557
+        },
+        "bdsmlr-324764-CdMeExWWcI-og.jpg": {
+          "size": 67968,
+          "mtime": 1562678738102
+        },
+        "j5_Report.csv": {
+          "size": 3988,
+          "mtime": 1563930180731
+        },
+        "nochockinew.txt": {
+          "size": 1507,
+          "mtime": 1563964677660
+        },
+        "project-trackbook ux interview 1.md": {
+          "size": 7129,
+          "mtime": 1538466815770
+        },
+        "puc19fsa.txt": {
+          "size": 2825,
+          "mtime": 1563933760441
+        }
+      },
+      "size": 89565,
+      "mtime": 1563964448891
+    },
+    "/csv": {
+      "files": {
+        "20170817_quantification_oshv_orf117_plasmid - QubitData_2017-08-17_10-33-11.csv": {
+          "size": 491,
+          "mtime": 1563932162253
+        },
+        ".DS_Store": {
+          "size": 6148,
+          "mtime": 1563956468567
+        },
+        "Oligo_Synthesis_cgg.csv": {
+          "size": 891,
+          "mtime": 1563964329627
+        },
+        "j5_Report.csv": {
+          "size": 3988,
+          "mtime": 1563932162255
+        }
+      },
+      "size": 18950,
+      "mtime": 1563962620331
+    },
+    "/csv/notes": {
+      "files": {
+        "browser-console.log.js": {
+          "size": 7425,
+          "mtime": 1563962332069
+        },
+        "foo.txt": {
+          "size": 7,
+          "mtime": 1563956500700
+        }
+      },
+      "size": 7432,
+      "mtime": 1563956752451
+    }
+  }
+}
+
+

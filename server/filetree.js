@@ -195,14 +195,12 @@ function updateDirInCache(root, stat, readDirs, readFiles) {
   });
 
   // hack
-  // console.log("\n\n##############################\n  filetree.js::updateDirInCache() updated files: \n  old\n",
-  //   updated, "\nnew\n", _updated, "##############################\n\n")
   console.log("\n\nfiletree.js::updateDirInCache() updated files:", _updated, "\n\n")
   
   update(root);
 }
 
-function updateDirSizes(emit=false) {
+function updateDirSizes() {
   const todo = Object.keys(dirs);
 
   todo.sort((a, b) => {
@@ -224,14 +222,9 @@ function updateDirSizes(emit=false) {
   //hack
   // console.log("filetree.js::updateDirSizes()", dirs)
   updated = dirs
-  if (emit) return dirs
 }
-
 
 //hack ////////////////////////////////////////////
-filetree.getDirSizes = function() {
-  return updateDirSizes(true)
-}
 filetree.getDirs = function() {
   return dirs
 }

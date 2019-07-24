@@ -671,11 +671,6 @@ function onWebSocketRequest(ws, req) {
         folder: dir,
         results: filetree.search(query, dir)
       });
-    } else if (msg.type === "ALL_SIZES") {
-      sendObj(sid, {
-        type: "ALL_FILE_SIZES",
-        data: filetree.getDirSizes()
-      });
     } else if (msg.type === "LS_ALL") {
       sendObj(sid, {
         type: "ALL_FILES",
