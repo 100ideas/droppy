@@ -671,6 +671,16 @@ function onWebSocketRequest(ws, req) {
         folder: dir,
         results: filetree.search(query, dir)
       });
+    } else if (msg.type === "ALL_SIZES") {
+      sendObj(sid, {
+        type: "ALL_FILE_SIZES",
+        data: filetree.getDirSizes()
+      });
+    } else if (msg.type === "LS_ALL") {
+      sendObj(sid, {
+        type: "ALL_FILES",
+        data: filetree.getDirs()
+      });
     }
   });
 
@@ -1248,6 +1258,13 @@ function handleUploadRequest(req, res) {
   }
 }
 
+filetree.on("chokidar", (event, path, fullpath, stats) => {
+  console.log('\n\nchokidar saw:\n', event, path, fullpath, stats, "\n\n")
+  sendObjAll({ type: "CHOKIDAR", event, path, fullpath, stats })
+  // console.log('\n\nchokidar saw:\n', ...info, "\n\n")
+  // sendObjAll({type: "CHOKIDAR", ...info })
+});
+
 filetree.on("updateall", () => {
   Object.keys(clientsPerDir).forEach(dir => {
     clientsPerDir[dir].forEach(client => {
@@ -1256,6 +1273,7 @@ filetree.on("updateall", () => {
   });
 });
 
+// some dir changed; if client is viewing it, tell it to update
 filetree.on("update", dir => {
   while (true) {
     if (clientsPerDir[dir]) {

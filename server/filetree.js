@@ -23,6 +23,7 @@ let initial = true;
 let watching = true;
 let timer = null;
 let cfg = null;
+let updated = {}
 
 const WATCHER_DELAY = 3000;
 
@@ -35,16 +36,22 @@ filetree.watch = function() {
     alwaysStat    : true,
     ignoreInitial : true,
     usePolling    : Boolean(cfg.pollingInterval),
+    // useFsEvents   : true  // supersedes polling on macos - defaults to true if not set
+    // awaitWriteFinish : true  // poll file size and only emit events when it is stable for some time
     interval      : cfg.pollingInterval,
     binaryInterval: cfg.pollingInterval
-  }).on("error", log.error).on("all", () => {
+  }).on("error", log.error).on("all", (event, path, stats) => {
     // TODO: only update what's really necessary
-    if (watching) filetree.updateAll();
+    if (watching) {
+      filetree.updateAll();
+      filetree.emit("chokidar", {event, path: utils.removeFilesPath(path), fullpath: path, stats})
+    }
   });
 };
 
 filetree.updateAll = debounce(() => {
   log.debug("Updating file tree because of local filesystem changes");
+  updated = dirs
   filetree.updateDir(null, () => {
     filetree.emit("updateall");
   });
@@ -122,6 +129,9 @@ filetree.updateDir = async function(dir) {
     }
   }
 
+  //hack
+  // console.log(`filetree.js::updateDir() entries (initial=${initial})`, entries)
+
   const readDirs = entries.filter(entry => entry.directory);
   const readFiles = entries.filter(entry => !entry.directory);
 
@@ -145,11 +155,18 @@ function updateDirInCache(root, stat, readDirs, readFiles) {
     }
   });
 
+  let _updated = {}
+
   // Add dirs
   Object.keys(readDirObj).forEach(path => {
+    let oldmtime = (updated[path] && updated[path].mtime) ? updated[path].mtime : 0
+    let newmtime = readDirObj[path].mtime.getTime() || oldMtime
+    
     dirs[path] = {
       files: {}, size: 0, mtime: readDirObj[path].mtime.getTime() || 0
     };
+
+    if (newmtime > oldmtime) _updated[path] = dirs[path]
   });
 
   // Add files
@@ -159,14 +176,33 @@ function updateDirInCache(root, stat, readDirs, readFiles) {
     const parentDir = normalize(utils.removeFilesPath(path.dirname(f.path)));
     const size = (f.stats && f.stats.size) ? f.stats.size : 0;
     const mtime = (f.stats && f.stats.mtime && f.stats.mtime.getTime) ? f.stats.mtime.getTime() : 0;
+    
+    let normPath = normalize(path.basename(f.path))
+    // let oldmtime = updated[parentDir].files[normPath] ? updated[parentDir].files[normPath].mtime : 0
+    let oldmtime = 0; let oldsize = 0;
+    if (updated[parentDir] && updated[parentDir].files && updated[parentDir].files[normPath]) {
+      oldmtime = updated[parentDir].files[normPath].mtime ? updated[parentDir].files[normPath].mtime : 0
+      oldsize = updated[parentDir].files[normPath].size ? updated[parentDir].files[normPath].size : 0
+    }
+    if ( !( (mtime === oldmtime) && (size === oldsize) ) ) {
+      if (!_updated.hasOwnProperty(parentDir)) _updated[parentDir] = {}
+      if (!_updated[parentDir].hasOwnProperty('files')) _updated[parentDir].files = {}
+      _updated[parentDir].files[normPath] = {oldsize, oldmtime, mtime, size}
+    }
+    
     dirs[parentDir].files[normalize(path.basename(f.path))] = {size, mtime};
     dirs[parentDir].size += size;
   });
 
+  // hack
+  // console.log("\n\n##############################\n  filetree.js::updateDirInCache() updated files: \n  old\n",
+  //   updated, "\nnew\n", _updated, "##############################\n\n")
+  console.log("\n\nfiletree.js::updateDirInCache() updated files:", _updated, "\n\n")
+  
   update(root);
 }
 
-function updateDirSizes() {
+function updateDirSizes(emit=false) {
   const todo = Object.keys(dirs);
 
   todo.sort((a, b) => {
@@ -185,7 +221,22 @@ function updateDirSizes() {
       dirs[path.dirname(d)].size += dirs[d].size;
     }
   });
+  //hack
+  // console.log("filetree.js::updateDirSizes()", dirs)
+  updated = dirs
+  if (emit) return dirs
 }
+
+
+//hack ////////////////////////////////////////////
+filetree.getDirSizes = function() {
+  return updateDirSizes(true)
+}
+filetree.getDirs = function() {
+  return dirs
+}
+///////////////////////////////////////////////////
+
 
 filetree.del = function(dir) {
   fs.stat(utils.addFilesPath(dir), (err, stats) => {
@@ -381,6 +432,8 @@ function entries(files, folders, relativePaths, base) {
       entries[name] = ["d", mtime, d.size].join("|");
     }
   });
+  //hack
+  // console.log("filetree.js::entries()", JSON.stringify(entries, null, 2))
   return entries;
 }
 
